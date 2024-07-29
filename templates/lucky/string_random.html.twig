@@ -1,0 +1,7 @@
+{% extends 'base.html.twig' %}
+{% block body %}
+<h1>El lorem generado es {{ elLorem }}</h1>
+<a href="{{path("lucky_number")}}">de vuelta al numero random </a>
+</br>
+<a href="{{ path("default_suma_2_numeros",{num1:5 , num2:10}) }}">click aqui para ir a la suma</a>
+{% endblock %}

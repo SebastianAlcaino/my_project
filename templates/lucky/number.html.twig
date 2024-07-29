@@ -1,0 +1,10 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+<h1>Your lucky number is {{ number }}</h1>
+<a href="{{ path("lucky_string_lorem",{id:10}) }}">click aqui 10</a>
+</br>
+<a href="{{ path("lucky_string_lorem",{id:5}) }}">click aqui 5</a>
+</br>
+<a href="{{ path("default_suma_2_numeros",{num1:5}) }}">click aqui para ir a la suma</a>
+{% endblock %}
