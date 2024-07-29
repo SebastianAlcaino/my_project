@@ -42,6 +42,12 @@ class TweetController extends AbstractController
                 "username" => "perrito",
                 "tweetBody" => "soy Un Perrito",
                 "createdAt" => "2024-07-11 22:08:59"
+            ],
+            [
+                "id" => 4,
+                "username" => "perrito",
+                "tweetBody" => "soy Un Perrito",
+                "createdAt" => "2024-07-11 22:08:59"
             ]
 
 
