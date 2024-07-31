@@ -15,6 +15,7 @@ class TweetParser
         return [
             "id" => $tweet->getId(),
             "tweetBody" => $tweet->getTweetBody(),
+            "likes" => count($tweet->getLikes()),
             "createdAt" => $tweet->getCreatedAt()->format("Y-m-d H:i:s"),
             "user" => $this->userParser->parseUser($tweet->getUser())
         ];
