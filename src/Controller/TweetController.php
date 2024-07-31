@@ -62,7 +62,7 @@ class TweetController extends AbstractController
             throw $this->createNotFoundException("No tweet found for id " . $id);
         }
 
-        return new JsonResponse($tweetParser->parseTweet($tweet));
+        return new JsonResponse($tweetParser->parseTweetAllInfo($tweet));
     }
 
     #[Route(path: "/tweet/create/{userId}", name: "create_tweet", methods: ["POST"])]
