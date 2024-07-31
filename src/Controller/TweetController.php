@@ -8,6 +8,8 @@ use App\Entity\Tweet;
 use App\Entity\User;
 use App\Repository\TweetRepository;
 use App\Repository\UserRepository;
+use App\Services\Parser\TweetParser;
+use App\Services\Parser\UserParser;
 use DateTime;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
@@ -21,10 +23,10 @@ class TweetController extends AbstractController
 {
 
     #[Route(path: "/tweet/delete/{id}", name: "delte_tweet", methods: ["POST"])]
-    public function deleteTweet(EntityManagerinterface $entityManager, int $id): JsonResponse
+    public function deleteTweet(TweetRepository $tweetRepository, EntityManagerinterface $entityManager, int $id): JsonResponse
     {
+        $tweet = $tweetRepository->find($id);
 
-        $tweet = $entityManager->getRepository(Tweet::class)->find($id);
         if ($tweet === null) {
             throw $this->createNotFoundException("No tweet found for id " . $id);
         }
@@ -36,11 +38,11 @@ class TweetController extends AbstractController
     }
 
     #[Route(path: "/tweet/update/{id}", name: "update_tweet", methods: ["POST"])]
-    public function updateTweet(EntityManagerInterface $entityManager, Request $request, int $id): JsonResponse
+    public function updateTweet(TweetRepository $tweetRepository, TweetParser $tweetParser, EntityManagerInterface $entityManager, Request $request, int $id): JsonResponse
     {
         $payload = $request->getPayload();
+        $tweet = $tweetRepository->find($id);
 
-        $tweet = $entityManager->getRepository(Tweet::class)->find($id);
         if ($tweet === null) {
             throw $this->createNotFoundException("No tweet found for id " . $id);
         }
@@ -48,29 +50,28 @@ class TweetController extends AbstractController
         $tweet->setTweetBody($payload->getString("tweetBody"));
         $entityManager->flush();
 
-        return new JsonResponse($this->tweetStructure($tweet));
+        return new JsonResponse($tweetParser->parseTweet($tweet));
     }
 
-    #[Route(path: "/tweet/show/{id}", name: "show_tweet",  methods: ["GET"])]
-    public function showTweet(EntityManagerInterface $entityManager, int $id): JsonResponse
+    #[Route(path: "/tweet/show/{id}", name: "show_tweet", methods: ["GET"])]
+    public function showTweet(TweetRepository $tweetRepository,TweetParser $tweetParser, int $id): JsonResponse
     {
-        $tweet = $entityManager->getRepository(Tweet::class)->find($id);
+        $tweet= $tweetRepository->find($id);
 
         if ($tweet === null) {
             throw $this->createNotFoundException("No tweet found for id " . $id);
         }
 
-        return new JsonResponse($this->tweetStructure($tweet));
+        return new JsonResponse($tweetParser->parseTweet($tweet));
     }
 
     #[Route(path: "/tweet/create/{userId}", name: "create_tweet", methods: ["POST"])]
-    public function createTweet(UserRepository $userRepository, EntityManagerInterface $entityManager, Request $request, int $userId): JsonResponse
+    public function createTweet(TweetParser $tweetParser, UserRepository $userRepository, EntityManagerInterface $entityManager, Request $request, int $userId): JsonResponse
     {
         /** @var User $user */
         $user = $userRepository->find($userId);
 
         $payload = $request->getPayload();
-
 
 
         $tweet = new Tweet();
@@ -82,59 +83,44 @@ class TweetController extends AbstractController
 
         $entityManager->flush();
 
-        return new JsonResponse($this->tweetStructure($tweet));
+        return new JsonResponse($tweetParser->parseTweet($tweet));
     }
 
     #[Route(path: "/tweet/list-all", name: "tweet_list", methods: ["GET"])]
-    public function listAllTweets(UserRepository $userRepository, EntityManagerInterface $entityManager): JsonResponse
+    public function listAllTweets(TweetRepository $tweetRepository,TweetParser $tweetParser, EntityManagerInterface $entityManager): JsonResponse
     {
-
-
         /** @var Tweet[] $tweets */
-        $tweets = $entityManager->getRepository(Tweet::class)->findAll();
+        $tweets= $tweetRepository->findAll();
+        
 
-        $arraytweets = [];
-
-
-
-
+        $arrayTweets = [];
 
         foreach ($tweets as $tweet) {
-
-            $arraytweets[] = $this->tweetStructure($tweet);
+            $arrayTweets[] = $tweetParser->parseTweet($tweet);
         }
 
-
-        return new JsonResponse($arraytweets);
+        return new JsonResponse($arrayTweets);
     }
 
     #[Route(path: "/tweet/list-all-tweets-for-a-single-user/{id}", name: "showAllTwetsByUserId", methods: ["GET"])]
-    public function getTweetsByUserId(UserRepository $userRepository, int $id): JsonResponse
+    public function getTweetsByUserId(TweetParser $tweetParser, UserRepository $userRepository, int $id): JsonResponse
     {
         /** @var User $user */
         $user = $userRepository->find($id);
 
-        $arraytweets = [];
+        $arrayTweets = [];
 
         foreach ($user->getTweets() as $tweet) {
 
-            $arraytweets[] = $this->tweetStructure($tweet);
+            $arrayTweets[] = $tweetParser->parseTweet($tweet);
         }
 
 
-        return new JsonResponse($arraytweets);
+        return new JsonResponse($arrayTweets);
     }
-    private function tweetStructure(Tweet $tweet): array
-    {
 
-        return [
-            "id" => $tweet->getId(),
-            "tweetBody" => $tweet->getTweetBody(),
-            "createdAt" => $tweet->getCreatedAt()->format("Y-m-d H:i:s"),
-            "user" => [
-                "id" => $tweet->getUser()->getId(),
-                "username" => $tweet->getUser()->getUsername()
-            ]
-        ];
-    }
+
+    //mostrr el usuario con sus respectivas weas y ammountoftweets
+
+
 }
