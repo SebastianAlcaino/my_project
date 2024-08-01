@@ -21,7 +21,7 @@ class UserController extends AbstractController
         $user = $userRepository->find($id);
         $count = count($user->getTweets());
 
-        return new JsonResponse(["user"=>$userParser->parseUser($user), "amountOfTweets"=>$count]);
+        return new JsonResponse(["user"=>$userParser->parseFollowing($user), "amountOfTweets"=>$count]);
     }
 
 //    #[Route(path: "/tweet/show/{id}", name: "show_tweet",  methods: ["GET"])]
