@@ -6,6 +6,7 @@ use App\Entity\Follow;
 use App\Entity\User;
 use App\Exception\CannotFollowMyselfException;
 use App\Exception\FollowingRelationAlreadyExistsException;
+use App\Exception\FollowingRelationDoesntExistException;
 use App\Exception\UserNotFoundException;
 use App\Repository\FollowRepository;
 use App\Repository\UserRepository;
@@ -61,18 +62,20 @@ class FollowHandler
         $this->entityManager->flush();
     }
 
-    public function removeFollow(int $userId, int $followerId): JsonResponse
+    /**
+     * @throws FollowingRelationDoesntExistException
+     */
+    public function removeFollow(int $followerId, int $followingId): void
     {
 
-        $follow = $this->followRepository->findOneBy(['user' => $userId, 'follower' => $followerId]);
+        $follow = $this->followRepository->findOneBy(['user' => $followerId, 'follower' => $followingId]);
 
         if ($follow == null) {
-            return new JsonResponse(['message' => "la relacion de seguimiento no existe para los usuarios: " . $userId . " y " . $followerId]);
+            throw new FollowingRelationDoesntExistException();
         }
         $this->entityManager->remove($follow);
         $this->entityManager->flush();
 
-        return new JsonResponse(['success' => true], Response::HTTP_OK);
     }
 
 
