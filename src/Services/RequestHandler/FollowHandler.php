@@ -20,7 +20,7 @@ class FollowHandler
     public function __construct(
         private readonly FollowRepository       $followRepository,
         private readonly UserRepository         $userRepository,
-        private readonly EntityManagerInterface $entityManager
+        private readonly EntityManagerInterface $entityManager,
     )
     {
     }
@@ -36,13 +36,13 @@ class FollowHandler
             throw new CannotFollowMyselfException();
         }
 
-        /** @var User $followerUser */
+        /** @var null|User $followerUser */
         $followerUser = $this->userRepository->find($followerId);
         if ($followerUser == null) {
             throw new UserNotFoundException(true);
         }
 
-        /** @var User $followingUser */
+        /** @var null|User $followingUser */
         $followingUser = $this->userRepository->find($followingId);
         if ($followingUser == null) {
             throw new UserNotFoundException(false);
