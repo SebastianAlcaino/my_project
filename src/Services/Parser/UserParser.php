@@ -8,7 +8,6 @@ class UserParser
 {
     public function parseUser(User $user): array
     {
-
         return ["id" => $user->getId(), "username" => $user->getUsername()];
     }
 
