@@ -58,7 +58,6 @@ class FollowHandler
         $follow->setFollower($followingUser);
 
         $this->entityManager->persist($follow);
-        $this->entityManager->flush();
     }
 
     public function removeFollow(int $userId, int $followerId): JsonResponse

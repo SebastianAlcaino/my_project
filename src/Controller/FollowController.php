@@ -6,6 +6,7 @@ use App\Exception\CannotFollowMyselfException;
 use App\Exception\FollowingRelationAlreadyExistsException;
 use App\Exception\UserNotFoundException;
 use App\Services\RequestHandler\FollowHandler;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -14,7 +15,7 @@ use Symfony\Component\Routing\Attribute\Route;
 class FollowController extends AbstractController
 {
     #[Route('/follow/add/{followerId}/{followingId}', name: 'add_follow', methods: 'POST')]
-    public function addFollow(FollowHandler $followHandler, int $followerId, int $followingId): JsonResponse
+    public function addFollow(FollowHandler $followHandler, int $followerId, int $followingId, EntityManagerInterface $entityManager): JsonResponse
     {
         try {
             $followHandler->addFollow($followerId, $followingId);
@@ -28,6 +29,8 @@ class FollowController extends AbstractController
         } catch (FollowingRelationAlreadyExistsException) {
             return new JsonResponse(['message' => "La relacion de seguimiento entre : " . $followerId . " y " . $followingId . " ya existe"], Response::HTTP_NOT_FOUND);
         }
+
+        $entityManager->flush();
         return new JsonResponse(["success" => true]);
     }
 
