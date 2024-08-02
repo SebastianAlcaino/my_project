@@ -8,6 +8,7 @@ use App\Entity\Follow;
 use App\Entity\User;
 use App\Exception\CannotFollowMyselfException;
 use App\Exception\FollowingRelationAlreadyExistsException;
+use App\Exception\FollowingRelationDoesntExistException;
 use App\Exception\UserNotFoundException;
 use App\Repository\FollowRepository;
 use App\Repository\UserRepository;
@@ -16,6 +17,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Mockery;
 use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
 use PHPUnit\Framework\TestCase;
+use function PHPUnit\Framework\once;
 
 class FollowHandlerTest extends TestCase
 {
@@ -81,6 +83,24 @@ class FollowHandlerTest extends TestCase
         $this->entityManager->allows('persist')->with(Mockery::type(Follow::class));
         $this->entityManager->allows('flush')->once();
         $this->followHandler->addFollow(1, 2);
+    }
+
+    public function testRemoveFollowFailsOnNonExistingFollow(): void{
+
+        self::expectException(FollowingRelationDoesntExistException::class);
+        $this->followRepository->allows('findOneBy')->with(['user' => 1, 'follower' => 2])->andReturn(null);
+        $this->followHandler->removeFollow(1, 2);
+
+    }
+
+    public function testRemoveFollowHappyPath(): void{
+
+        $this->followRepository->allows('findOneBy')->with(['user' => 1, 'follower' => 2])->andReturn($this->follow);
+        $this->entityManager->allows("remove")->with($this->follow);
+        $this->entityManager->allows('flush')->once();
+        $this->followHandler->removeFollow(1, 2);
+
+
     }
 
     protected function setUp(): void

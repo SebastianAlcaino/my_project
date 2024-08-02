@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Exception\CannotFollowMyselfException;
 use App\Exception\FollowingRelationAlreadyExistsException;
+use App\Exception\FollowingRelationDoesntExistException;
 use App\Exception\UserNotFoundException;
 use App\Services\RequestHandler\FollowHandler;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -31,9 +32,14 @@ class FollowController extends AbstractController
         return new JsonResponse(["success" => true]);
     }
 
-    #[Route("/follow/remove/{userId}/{followerId}", name: 'remove_follow', methods: 'POST')]
-    public function removeFollow(FollowHandler $followHandler, int $userId, int $followerId): JsonResponse
+    #[Route("/follow/remove/{followerId}/{followingId}", name: 'remove_follow', methods: 'POST')]
+    public function removeFollow(FollowHandler $followHandler, int $followerId, int $followingId): JsonResponse
     {
-        return $followHandler->removeFollow($userId, $followerId);
+        try {
+            $followHandler->removeFollow($followerId, $followingId);
+        }catch (FollowingRelationDoesntExistException){
+            return new JsonResponse(['message' => "La relacion de seguimiento entre : " . $followerId . " y " . $followingId . " no existe"], Response::HTTP_NOT_FOUND);
+        }
+        return new JsonResponse(["success" => true]);
     }
 }
